@@ -1,0 +1,146 @@
+#$logger->debug("This is a debug message.");
+#$logger->info("This is an info level message.");
+#$logger->notice("This is a notice level message.");
+#$logger->warning("This is a warning level message.");
+#$logger->error("This is an error level message.");
+#$logger->critical("This is a critical level message.");
+#$logger->alert("This is an alert level message.");
+#$logger->emergency("This is an emergency level message.");
+
+monolog:
+    channels:
+        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+
+when@dev:
+    monolog:
+        handlers:
+            # Log only emergency
+            _emergency:
+                type: rotating_file
+                date_format: "Ymd"
+                filename_format: "{date}-{filename}"
+                bubble: false
+                path: "%kernel.logs_dir%/%kernel.environment%-error.log"
+                level: emergency
+                channels: ["app"]
+
+            # Log only alert
+            _alert:
+                type: rotating_file
+                date_format: "Ymd"
+                filename_format: "{date}-{filename}"
+                bubble: false
+                path: "%kernel.logs_dir%/%kernel.environment%-error.log"
+                level: alert
+                channels: ["app"]
+
+            # Log only critical
+            _critical:
+                type: rotating_file
+                date_format: "Ymd"
+                filename_format: "{date}-{filename}"
+                bubble: false
+                path: "%kernel.logs_dir%/%kernel.environment%-error.log"
+                level: critical
+                channels: ["app"]
+
+            # Log only error
+            _error:
+                #type: stream
+                type: rotating_file
+                date_format: "Ymd"
+                filename_format: "{date}-{filename}"
+                bubble: false
+                path: "%kernel.logs_dir%/%kernel.environment%-error.log"
+                level: error
+                channels: ["app"]
+            
+            # Log only warning
+            _warning:
+                type: rotating_file
+                date_format: "Ymd"
+                filename_format: "{date}-{filename}"
+                bubble: false
+                path: "%kernel.logs_dir%/%kernel.environment%-warning.log"
+                level: warning
+                channels: ["app"]
+            
+            # Log only notice
+            #_notice:
+            #    type: rotating_file
+            #    date_format: "Ymd"
+            #    filename_format: "{date}-{filename}"
+            #    bubble: false
+            #    path: "%kernel.logs_dir%/%kernel.environment%-info.log"
+            #    level: notice
+            
+            # Log only info
+            #_info:
+            #    type: rotating_file
+            #    date_format: "Ymd"
+            #    filename_format: "{date}-{filename}"
+            #    #bubble: false
+            #    path: "%kernel.logs_dir%/%kernel.environment%-info.log"
+            #    level: info
+            #    channels: ["!event", "!doctrine", "!console", "!security", "!request"]
+            
+            # Log only debug
+            #_debug:
+            #    type: rotating_file
+            #    date_format: "Ymd"
+            #    filename_format: "{date}-{filename}"
+            #    bubble: false
+            #    path: "%kernel.logs_dir%/%kernel.environment%-info.log"
+            #    level: debug
+
+            # uncomment to get logging in your browser
+            # you may have to allow bigger header sizes in your Web server configuration
+            #firephp:
+            #    type: firephp
+            #    level: info
+            
+            #chromephp:
+            #    type: chromephp
+            #    level: info
+
+            console:
+                type: console
+                process_psr_3_messages: false
+                channels: ["!event", "!doctrine", "!console"]
+
+when@test:
+    monolog:
+        handlers:
+            main:
+                type: fingers_crossed
+                action_level: error
+                handler: nested
+                excluded_http_codes: [404, 405]
+                channels: ["!event"]
+            nested:
+                type: stream
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+
+when@prod:
+    monolog:
+        handlers:
+            main:
+                type: fingers_crossed
+                action_level: error
+                handler: nested
+                excluded_http_codes: [404, 405]
+                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+            nested:
+                type: stream
+                path: php://stderr
+                level: debug
+                formatter: monolog.formatter.json
+            console:
+                type: console
+                process_psr_3_messages: false
+                channels: ["!event", "!doctrine"]
+            deprecation:
+                type: stream
+                channels: [deprecation]
+                path: php://stderr

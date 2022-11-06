@@ -1,3 +1,38 @@
+#------------------------------------------------------------------------------
+# Symfony routes
+#------------------------------------------------------------------------------
+
 controllers:
     resource: ../src/Controller/
     type: attribute
+
+# Sample: return parameters passed by GET only
+api_index:
+    path: /
+    controller: App\Controller\IndexController::index
+    methods: GET
+
+# Sample: return current PHP version
+api_php_version:
+    path: /php-version
+    controller: App\Controller\IndexController::phpVersion
+    methods: GET
+
+# Sample: display PHP info page
+api_php_info:
+    path: /php-info
+    controller: App\Controller\IndexController::phpInfo
+    methods: GET
+
+#------------------------------------------------------------------------------
+# Apifony route: use aspect inpired achitecture if Symfony route not found
+#------------------------------------------------------------------------------
+
+# Unique route
+api_aspect:
+    path: /{_uri_}
+    controller: App\Controller\ApifonyController::run
+    methods: [GET, POST, PUT, DELETE]
+    requirements:
+        _uri_: '.*'
+
